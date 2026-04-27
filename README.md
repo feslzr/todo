@@ -1,38 +1,70 @@
 # Kobold.TodoApp
 
-## Introdução
+## Visão geral
 
-Este repositório define uma web API para gerenciamento de tarefas. O código fonte está organizado da seguinte forma:
+Este repositório contém uma Web API ASP.NET Core para gerenciamento de tarefas (`Todo`).
 
-* Controllers:
-* Models:
-* Services:
-* run.sh: arquivo de inicialização da aplicação.
+A solução foi organizada em camadas simples:
 
-Para iniciar a aplicação execute o comando:
+- **Controllers**: expõem os endpoints HTTP.
+- **Models**: definem as entidades e view models.
+- **Services**: concentram a regra de negócio e o estado em memória.
 
+## Como executar
+
+Executar o projeto da API:
+
+```bash
+dotnet run --project src/Kobold.TodoApp.Api
 ```
-> dotnet run -p src/Kobold.TodoApp.Api
-```
+
+Com o Swagger habilitado, a documentação fica disponível na rota configurada no ambiente de desenvolvimento.
 
 ## Exercício
 
-O exercício é composto de duas partes, a primeira obrigatória e a segunda opcional.
+O exercício é composto de duas partes.
 
-### Parte I
+### Parte I — agrupamento de tarefas em coleções
 
-Altere o código da aplicação, implementando um mecanismo de agrupamento das tarefas (definidas pela classe `Todo`) em coleções, expondo as novas funcionalidades implementadas para consumo na web API.
+A aplicação original mantinha todos os `Todo` em uma única lista.  
+Nesta solução, foi introduzida a entidade **Collection**, que passa a representar o agrupamento das tarefas.
 
-### Parte II
+### O que foi implementado
 
-A aplicação não define um mecanismo de tratamento de erros, e exceções no processamento são expostas na resposta ao usuário. Implementar mecanismo de tratamento de erros na aplicação, de forma que as respostas apresentadas ao usuário não exponham detalhes da aplicação, e apresentem mensagens claras.
+- criação de coleções;
+- listagem de coleções;
+- consulta de coleção por id;
+- remoção de coleção;
+- inclusão de tarefas dentro de uma coleção existente;
+- listagem de tarefas por coleção;
+- consulta, atualização e remoção de uma tarefa dentro de uma coleção.
+
+### Decisões de modelagem
+
+- `Collection` passou a ser a entidade raiz do agrupamento;
+- `Todo` passou a viver dentro de `Collection.Todos`;
+- o antigo `TodosController` foi removido do build para evitar duplicidade de estado e inconsistência entre fluxos concorrentes;
+- os dados permanecem em memória, como na proposta original do projeto.
+
+### Parte II — tratamento de erros
+
+Foi implementado um middleware global para tratamento de exceções.  
+O objetivo é evitar a exposição de detalhes internos da aplicação e devolver mensagens claras ao consumidor da API.
+
+### Comportamento adotado
+
+- `ArgumentException` e `ArgumentNullException` retornam **400 Bad Request**;
+- `InvalidOperationException` retorna **404 Not Found**;
+- exceções inesperadas retornam **500 Internal Server Error** com mensagem genérica;
+- a resposta enviada ao cliente segue um formato simples, contendo apenas a mensagem de erro.
 
 ## Avaliação
 
-No processo de avaliação do código, avaliaremos as seguintes características:
-* Aderência da implementação ao código existente.
-* Clareza do código implementado.
-* Documentação das alterações efetuadas.
-* Estrutura das mensagens de commit.
+No processo de avaliação do código, serão observados principalmente:
 
-A solução para o problema não é única. O candidato deve analisar o código existente, definir as funcionalidades a serem implementadas e implementa-las. A avaliação da solução apresentada será realizada em conversa com o candidato, com o objetivo de entender o processo de análise e tomada de decisões que levou àquela solução.
+- aderência da implementação ao código existente;
+- clareza do código implementado;
+- documentação das alterações efetuadas;
+- estrutura das mensagens de commit.
+
+A solução para o problema não é única. O candidato deve analisar o código existente, definir as funcionalidades a serem implementadas e implementá-las. A avaliação da solução apresentada será realizada em conversa com o candidato, com o objetivo de entender o processo de análise e tomada de decisões que levou àquela solução.
